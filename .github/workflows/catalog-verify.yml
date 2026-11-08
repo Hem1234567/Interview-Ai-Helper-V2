@@ -1,0 +1,21 @@
+name: Verify model catalog
+
+# Weekly check that every model download link still exists and to print the exact hashes.
+# Kept separate from the build so a Hugging Face outage can never turn the build red.
+on:
+  schedule:
+    - cron: '17 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Check catalog against Hugging Face
+        run: python3 scripts/pin-catalog.py | tee -a "$GITHUB_STEP_SUMMARY"

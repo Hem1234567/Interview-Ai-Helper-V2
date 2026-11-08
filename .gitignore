@@ -1,0 +1,16 @@
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build
+/app/build
+/captures
+.externalNativeBuild
+.cxx
+*.keystore
+
+# Native sources are fetched at build time (pinned in scripts/fetch-native-deps.sh)
+/app/src/main/cpp/third_party/
+*.gguf
+*.bin
