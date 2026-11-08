@@ -8,8 +8,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-set(CMAKE_C_VISIBILITY_PRESET hidden)
+
+# NOTE: Do NOT set CMAKE_CXX_VISIBILITY_PRESET / CMAKE_C_VISIBILITY_PRESET here globally.
+# Setting them before add_subdirectory() propagates into llama.cpp / whisper.cpp and hides all
+# their symbols in the resulting .so files. With Android's --no-undefined linker flag that
+# causes "undefined symbol" errors for llama-common's chat-template functions at link time.
+# Visibility is scoped to copilot_native only via set_target_properties() below.
 
 set(LLAMA_PIN_TAG    "b10108"  CACHE STRING "llama.cpp tag")
 set(LLAMA_PIN_COMMIT "0a50d9909a3478e82679f505bf8595d1eee4b0a8" CACHE STRING "llama.cpp commit")
@@ -70,6 +74,13 @@ add_subdirectory("${COPILOT_THIRD_PARTY}/llama.cpp" llama EXCLUDE_FROM_ALL)
 add_subdirectory("${COPILOT_THIRD_PARTY}/whisper.cpp" whisper EXCLUDE_FROM_ALL)
 
 add_library(copilot_native SHARED native_llm.cpp native_whisper.cpp native_common.h)
+
+# Scope symbol visibility to this library only — do NOT set it globally before add_subdirectory
+# or llama-common's symbols will be hidden in its .so and unresolvable at link time.
+set_target_properties(copilot_native PROPERTIES
+    CXX_VISIBILITY_PRESET hidden
+    C_VISIBILITY_PRESET   hidden)
+
 target_include_directories(copilot_native PRIVATE
   "${COPILOT_THIRD_PARTY}/llama.cpp/include"
   "${COPILOT_THIRD_PARTY}/llama.cpp/common"
