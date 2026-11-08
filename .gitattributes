@@ -31,3 +31,4 @@ gradlew.bat text eol=crlf
 *.so  binary
 *.gguf binary
 *.bin binary
+
